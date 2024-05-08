@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>location</title>
+    <style>
+        *{
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+        body{
+            background: linear-gradient(orange 50%,purple 50%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button{
+            text-align: center;
+            background: #fff;
+            color: purple;
+            font-size: 50px;
+            padding: 25px 46px;
+            border: none;
+            outline: none;
+            text-transform: capitalize;
+            border-radius: 10px;
+            cursor: pointer;
+            /* min-height: 50vh; */
+        }
+    </style>
+</head>
+<body>
+    <button id="location"> detect your location</button>
+
+<script>
+    const locationbtn = document.getElementById('location')
+
+    locationbtn.addEventListener('click',()=>{
+        if(navigator.geolocation){
+            locationbtn.innerHTML = 'allow to detect location'
+        navigator.geolocation.getCurrentPosition(onSucess,onError)
+        }else{
+        locationbtn.innerHTML = 'browser does not support'
+        }
+    })
+
+//opencage geocoding api
+    function onSucess(position){
+        locationbtn.innerHTML = 'detecting your location...'
+        let {latitude, longitude} = position.coords;
+        fetch(`https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR-API-KEY`)
+        .then(response =>response.json()).then(result=>{
+            let allDetails = result.results[0].components;
+            let {country, postcode, state} = allDetails;
+            locationbtn.innerHTML = `${country} ${postcode},${country}`
+            console.table(allDetails)
+        }).catch(()=>{
+        locationbtn.innerHTML = 'something went wrong'
+        })
+        
+    }
+    
+    function onError(error){
+      if(error.code ===1){
+        locationbtn.innerHTML = 'you denied the request'
+      }
+      else if(error.code ===2 || error.code === 'ERR_INTERNET_DISCONNECTED.'){
+        locationbtn.innerHTML = 'location not availiable'
+      }
+      else{
+        locationbtn.innerHTML = 'something went wrong'
+      }
+      locationbtn.setAttribute('disabled', 'true')
+    }
+</script>
+</body>
+</html>
